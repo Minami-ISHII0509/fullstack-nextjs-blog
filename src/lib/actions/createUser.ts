@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import bcryptjs from "bcryptjs";
 import { signIn } from "@/auth";
 import { redirect } from "next/navigation";
+import { ZodError } from "zod";
 
 type ActionState = {
   success: boolean;
@@ -12,9 +13,10 @@ type ActionState = {
 };
 
 // バリデーションエラー処理
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function handleValidationError(error: any): ActionState {
+function handleValidationError(error: ZodError): ActionState {
   const { fieldErrors, formErrors } = error.flatten();
+  // fieldErrorsにundefinedが入らないようにキャスト
+  const castedFieldErrors = fieldErrors as Record<string, string[]>;
   // zodの仕様でパスワード一致確認のエラーは formErrorsで渡ってくる
   // formErrorsがある場合は、confirmPasswordフィールドにエラーを追加
   if (formErrors.length > 0) {
@@ -23,7 +25,7 @@ function handleValidationError(error: any): ActionState {
       errors: { ...fieldErrors, confirmPassword: formErrors },
     };
   }
-  return { success: false, errors: fieldErrors };
+  return { success: false, errors: castedFieldErrors };
 }
 // カスタムエラー処理
 function handleError(customErrors: Record<string, string[]>): ActionState {
