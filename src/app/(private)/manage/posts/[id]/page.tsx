@@ -1,5 +1,6 @@
+import { auth } from "@/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getPost } from "@/lib/post";
+import { getOwnPost } from "@/lib/ownPosts";
 import { Post } from "@/types/post";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
@@ -13,9 +14,14 @@ type Params = {
   params: Promise<{ id: string }>;
 };
 
-export default async function PostPage({ params }: Params) {
+export default async function ShowPage({ params }: Params) {
+  const session = await auth();
+  const userId = session?.user?.id;
+  if (!session?.user?.email || !userId) {
+    throw new Error("不正なリクエストです");
+  }
   const { id } = await params;
-  const post = (await getPost(id)) as Post;
+  const post = (await getOwnPost(userId, id)) as Post;
 
   if (!post) {
     notFound();
