@@ -96,7 +96,7 @@ export default function EditPostForm({ post }: EditPostFormProps) {
                 width={0}
                 height={0}
                 sizes="200px"
-                className="w-[200px]"
+                className="w-50"
                 priority
               />
             </div>
